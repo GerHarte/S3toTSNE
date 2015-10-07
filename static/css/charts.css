@@ -1,0 +1,114 @@
+body.application {
+  padding: 0;
+  margin: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+#app-wrapper {
+  height: 100%;
+  position: aboslute;
+  width: 100%;
+}
+
+#app-outer-toolbar {
+  z-index: 2;
+}
+#app-toolbar {
+  background: rgba(0,0,0,.75);
+  box-shadow: 0 1px 5px rgba(0,0,0,.1);
+  color: #fff;
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 1;
+}
+
+#app-toolbar .btn-primary {
+  background-color: #00afd7;
+  border: medium none;
+  width: 100%;
+}
+#app-toolbar .btn-primary:focus,
+#app-toolbar .btn-primary:hover {
+  background-color: #0098BB;
+}
+
+#app-tsnearea {
+  border-right: 1px solid #d7d7d7;
+  position: fixed;
+  top: 60px;
+  width: 100%;
+  z-index: 0;
+}
+
+
+#app-sidebar .chart-wrapper {
+  border: medium none;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+.tools {
+  padding: 0 5px 0 0;
+}
+
+.tool input, .tool select {
+  background: rgba(0,0,0,.5);
+  border: medium none;
+  box-shadow: none;
+  color: #e7e7e7;
+  float: left;
+  margin: 0 1%;
+}
+.tool input,
+.tool label,
+.tool h5 {
+  text-shadow: 0 0 1px #000;
+  width: 100%;
+}
+
+
+
+svg {
+  font: 10px sans-serif;
+  align: center;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+
+.axis path, .axis line
+{
+    fill: none;
+    stroke: #777;
+    shape-rendering: crispEdges;
+}
+
+.axis text
+{
+    font-family: 'Arial';
+    font-size: 10px;
+}
+.tick
+{
+    stroke-dasharray: 1, 2;
+}
+.bar
+{
+    fill: FireBrick;
+}
+

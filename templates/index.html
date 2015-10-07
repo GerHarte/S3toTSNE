@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TSNE</title>
+    <link rel="stylesheet" type="text/css" href="../static/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/keen-dashboards.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/charts.css" />
+    
+    <script src="http://d3js.org/d3.v3.min.js" type="text/JavaScript"></script>
+  </head>
+  <body class="application">
+    <div id="app-wrapper">
+      <div id="app-outer-toolbar"><!-- onMouseOver="show_toolbar()" onMouseOut="hide_toolbar()">-->
+      <div id="app-toolbar">
+        <div class="row tools">
+            <div class="col-sm-2">
+              <div class="tool">
+                <label> S3 Bucket<input type="text" id="option-filepath" class="form-control" name = "img_path" placeholder = "S3_Bucket/folder"></label>
+              </div>
+            </div>
+            <div class="col-sm-1 col-sm-offset-1">
+              <div class="tool">
+                <label>Exageration<input type="text" id="option-exageration" class="form-control" value='8' name = "exageration"></label>
+              </div>
+            </div>
+            <div class="col-sm-1">
+              <div class="tool">
+                <label>Learning Rate<input type="text" id="option-learning-rate" class="form-control" value='10' name = "learning-rate"></label>
+              </div>
+            </div>
+            <div class="col-sm-1">
+              <div class="tool">
+                <label>Perplexity<input type="text" id="option-perplexity" class="form-control" value='30' name = "perplexity"></label>
+              </div>
+            </div>
+            <div class="col-sm-1">
+              <div class="tool">
+                <label>Distance<select class="form-control" id="option-metric" name = "metric">
+                  <option value = 'cosine'> Cosine  </option>
+                  <option value = 'euclidean'> Euclidean  </option>
+                  <option value = 'l2'> l2  </option>
+                  <option value = 'l1'> l1  </option>
+                  <option value = 'manhattan'> Manhattan  </option>
+                  <option value = 'cityblock'> Cityblock  </option>
+                  <option value = 'braycurtis'> Braycurtis  </option>
+                  <option value = 'canberra'> Canberra  </option>
+                  <option value = 'chebyshev'> Chebyshev  </option>
+                  <option value = 'correlation'> Correlation  </option>
+                  <option value = 'dice'> Dice  </option>
+                  <option value = 'hamming'> Hamming  </option>
+                  <option value = 'jaccard'> Jaccard  </option>
+                  <option value = 'kulsinski'> Kulsinski  </option>
+                  <option value = 'mahalanobis'> Mahalanobis  </option>
+                  <option value = 'matching'> Matching  </option>
+                  <option value = 'minkowski'> Minkowski  </option>
+                  <option value = 'rogerstanimoto'> Rogerstanimoto  </option>
+                  <option value = 'russellrao'> Russellrao  </option>
+                  <option value = 'seuclidean'> Seuclidean  </option>
+                  <option value = 'sokalmichener'> Sokalmichener  </option>
+                  <option value = 'sokalsneath'> Sokalsneath  </option>
+                  <option value = 'sqeuclidean'> Sqeuclidean  </option>
+                  <option value = 'yule'> Yule  </option>
+                  <option value = 'wminkowski'> Wminkowski  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+          
+          <div class="col-sm-1">
+            <div class="tool">
+              <label>TSNE<button id="refresh" class="btn btn-primary btn-block">Refresh</button></label>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <div id="app-tsnearea"></div>
+  
+</div>
+
+</div>
+<script type="text/javascript" src="../static/lib/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/lib/keen-js/dist/keen.min.js"></script>
+<script>
+
+  $('#refresh').on('click', function() { 
+
+    dta = JSON.stringify({
+            img_path: $('#option-filepath').val(),
+            exageration: $('#option-exageration').val(),
+            learning_rate: $('#option-learning-rate').val(),
+            perplexity: $('#option-perplexity').val(),
+            metric: $('#option-metric').val()
+      });
+    console.log(dta);
+
+    $.ajax({
+      type: "POST",
+      url: "{{ url_for('get_images') }}",
+      data: dta,
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+        console.log(JSON.parse(result));
+        draw_tsne_data(JSON.parse(result));
+      } 
+    });
+
+  });
+
+
+  function draw_tsne_data(sampleData) {
+
+    console.log(sampleData);
+    
+    d3.select("svg")
+       .remove();
+
+    var width =   parseInt(d3.select("#app-tsnearea").style("width"), 10);
+    var height =   $(window).height() - 60 ;
+
+
+
+    var xScale = d3.scale.linear()
+             .domain([  d3.min(sampleData, function(d) { return d.x; }),
+                  d3.max(sampleData, function(d) { return d.x; })])
+             .range([10, width]);
+             
+    var yScale = d3.scale.linear()
+             .domain([  d3.min(sampleData, function(d) { return d.y; }), 
+                  d3.max(sampleData, function(d) { return d.y; })])
+             .range([10, height]);
+
+    var sizeScale = d3.scale.linear()
+             .domain([  1, 10])
+             .range([16, 100]);
+
+
+    var force = d3.layout.force()
+    .gravity(0.05)
+    .charge(function(d, i) { return i ? 0 : -1; })
+    .nodes(sampleData)
+    .size([width, height]);
+
+    // force.start();
+
+
+    var svg = d3.select("#app-tsnearea")
+        .append("svg:svg")
+          .attr("height", height)
+          .attr("width", width)
+        .append("g")
+          .call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", zoom)); 
+        ;
+
+
+    svg.append("rect")
+       .attr("class", "overlay")
+       .attr("width", width)
+       .attr("height", height);
+     
+
+
+    var circle = svg.selectAll("rect")
+        .data(sampleData)
+        .enter()
+        .append("svg:image")
+           .attr("xlink:href", function(d) { return d.path;})
+           // .attr("x", "-8px")
+           // .attr("y", "-8px")
+           .attr("width", "16px")
+           .attr("height", "16px")
+           .attr("transform", transform);
+
+    console.log(sampleData);
+                
+
+    function zoom() {
+      circle.attr("transform", transform);
+      circle.attr("width", scale_img);
+      circle.attr("height", scale_img);
+      // force.resume();
+    }
+
+    function transform(d) {
+      return "translate(" + xScale(d.x) + "," + yScale(d.y) + ")";
+    }
+
+    function scale_img(d) {
+      return sizeScale(d3.event.scale);
+    }
+
+
+    force.on("tick", function(e) {
+      var q = d3.geom.quadtree(sampleData),
+          i = 0,
+          n = sampleData.length;
+
+      while (++i < n) q.visit(collide(sampleData[i]));
+
+      svg.selectAll("circle")
+          .attr("cx", function(d) { return d.x; })
+          .attr("cy", function(d) { return d.y; });
+    });
+
+    function collide(node) {
+      console.log(node);
+      var r = .1
+          nx1 = node.x - r,
+          nx2 = node.x + r,
+          ny1 = node.y - r,
+          ny2 = node.y + r;
+      return function(quad, x1, y1, x2, y2) {
+        if (quad.point && (quad.point !== node)) {
+          var x = node.x - quad.point.x,
+              y = node.y - quad.point.y,
+              l = Math.sqrt(x * x + y * y),
+              r = node.radius + quad.point.radius;
+          if (l < r) {
+            l = (l - r) / l * .5;
+            node.x -= x *= l;
+            node.y -= y *= l;
+            quad.point.x += x;
+            quad.point.y += y;
+          }
+        }
+        return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
+      };
+    }
+
+}
+
+</script>
+
+</body>
+</html>
