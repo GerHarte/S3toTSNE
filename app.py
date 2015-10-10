@@ -170,7 +170,7 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
         t_sne_df = pickle.loads(t_sne_df_pickle.get_contents_as_string())
 
 
-    return t_sne_df[:300].to_json(orient ='records')
+    return t_sne_df[:500].to_json(orient ='records')
     
     
     
