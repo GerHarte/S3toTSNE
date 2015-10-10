@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>TSNE</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <link rel="stylesheet" type="text/css" href="../static/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/keen-dashboards.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/charts.css" />
@@ -138,14 +139,6 @@
              .range([16, 100]);
 
 
-    var force = d3.layout.force()
-    .gravity(0.05)
-    .charge(function(d, i) { return i ? 0 : -1; })
-    .nodes(sampleData)
-    .size([width, height]);
-
-    // force.start();
-
 
     var svg = d3.select("#app-tsnearea")
         .append("svg:svg")
@@ -163,13 +156,14 @@
      
 
 
-    var circle = svg.selectAll("rect")
+    var rect = svg.selectAll("rect")
         .data(sampleData)
         .enter()
         .append("svg:image")
            .attr("xlink:href", function(d) { return d.path;})
            // .attr("x", "-8px")
            // .attr("y", "-8px")
+           .attr("class", "whale-img")
            .attr("width", "16px")
            .attr("height", "16px")
            .attr("transform", transform);
@@ -178,9 +172,9 @@
                 
 
     function zoom() {
-      circle.attr("transform", transform);
-      circle.attr("width", scale_img);
-      circle.attr("height", scale_img);
+      rect.attr("transform", transform);
+      rect.attr("width", scale_img);
+      rect.attr("height", scale_img);
       // force.resume();
     }
 
@@ -192,45 +186,69 @@
       return sizeScale(d3.event.scale);
     }
 
+   function arrangeLabels() {
+    console.log('running');
+    var move = 1;
+    while(move > 0) {
+      move = 0;
+      // d3.selectAll(".whale-img")
+      rect.each(function() {
+          // console.log(d3.select(this).data());
+           var that = this,
+               a = this.getBoundingClientRect();
+           // d3.selectAll(".whale-img")
+           rect.each(function() {
+                if(this != that) {
+                  var b = this.getBoundingClientRect();
+                  if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
+                     (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+                    // overlap, move labels
+                    var dx = (Math.max(0, a.right - b.left) +
+                             Math.min(0, a.left - b.right)) * 0.01,
+                        dy = (Math.max(0, a.bottom - b.top) +
+                             Math.min(0, a.top - b.bottom)) * 0.02,
+                        tt = d3.transform(d3.select(this).attr("transform")),
+                        to = d3.transform(d3.select(that).attr("transform"));
+                    move += Math.abs(dx) + Math.abs(dy);
+                  
+                    to.translate = [ to.translate[0] + dx, to.translate[1] + dy ];
+                    tt.translate = [ tt.translate[0] - dx, tt.translate[1] - dy ];
+                    d3.select(this).attr("transform", "translate(" + tt.translate + ")");
+                    d3.select(that).attr("transform", "translate(" + to.translate + ")");
+                    a = this.getBoundingClientRect();
 
-    force.on("tick", function(e) {
-      var q = d3.geom.quadtree(sampleData),
-          i = 0,
-          n = sampleData.length;
+                  }
+                }
+              });
+         });
+      }
 
-      while (++i < n) q.visit(collide(sampleData[i]));
 
-      svg.selectAll("circle")
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
-    });
+      // Set the data values as the non-overlapping points
+      rect.each(function() {
 
-    function collide(node) {
-      console.log(node);
-      var r = .1
-          nx1 = node.x - r,
-          nx2 = node.x + r,
-          ny1 = node.y - r,
-          ny2 = node.y + r;
-      return function(quad, x1, y1, x2, y2) {
-        if (quad.point && (quad.point !== node)) {
-          var x = node.x - quad.point.x,
-              y = node.y - quad.point.y,
-              l = Math.sqrt(x * x + y * y),
-              r = node.radius + quad.point.radius;
-          if (l < r) {
-            l = (l - r) / l * .5;
-            node.x -= x *= l;
-            node.y -= y *= l;
-            quad.point.x += x;
-            quad.point.y += y;
-          }
-        }
-        return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-      };
+        tt = d3.transform(d3.select(this).attr("transform"));
+
+        d3.select(this).data()[0].x = xScale.invert(tt.translate[0]);
+        d3.select(this).data()[0].y = yScale.invert(tt.translate[1]);
+
+      });
+      console.log('finished');
+
+
     }
 
-}
+
+    console.log('about to run arrangeLabels');
+    arrangeLabels();
+    console.log('arrangeLabels finished');
+    console.log(rect);
+
+    
+
+
+  }
+
 
 </script>
 

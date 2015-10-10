@@ -63,7 +63,9 @@ def get_images():
         folder = '/'.join(path.split('/')[1:])
         new_data_folder = 'tsnetooldata/' + folder
 
-        con_s3 = S3Connection('AKIAIVSJ3ENCUAPO5YYA', 'qiqfbCTSd9VV3VCUCDFU+3c2AX7vU3x/MgX9Le9F')
+        
+
+        con_s3 = S3Connection()
         tsnetooldata_bucket = con_s3.get_bucket('tsnetooldata')
 
         selectedBucket = con_s3.get_bucket(bucket)
@@ -124,7 +126,7 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
     similarities_pickle_file = folder + '/img_similarities_' + metric + '.pkl'
     t_sne_df_pickle_file = folder + '/tsne_fit_' + metric + '_' + str(perplexity) + '_' + str(exageration) + '_' +  str(learning_rate) + '.pkl'
 
-    con_s3 = S3Connection('AKIAIVSJ3ENCUAPO5YYA', 'qiqfbCTSd9VV3VCUCDFU+3c2AX7vU3x/MgX9Le9F')
+    con_s3 = S3Connection()
     tsnetooldata_bucket = con_s3.get_bucket('tsnetooldata')
 
     img_data_pkl = tsnetooldata_bucket.get_key(folder + '/img_data.pkl')
@@ -168,7 +170,7 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
         t_sne_df = pickle.loads(t_sne_df_pickle.get_contents_as_string())
 
 
-    return t_sne_df.to_json(orient ='records')
+    return t_sne_df[:300].to_json(orient ='records')
     
     
     
