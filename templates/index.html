@@ -114,6 +114,7 @@
 
   function draw_tsne_data(sampleData) {
 
+
     console.log(sampleData);
     
     d3.select("svg")
@@ -121,6 +122,23 @@
 
     var width =   parseInt(d3.select("#app-tsnearea").style("width"), 10);
     var height =   $(window).height() - 60 ;
+
+    var mid_x = width/2;
+    var mid_y = height/2;
+
+
+    // var force = d3.layout.force()
+    // .nodes(sampleData)
+    // .charge(-0.001)
+    // .gravity(0)
+    // .chargeDistance(.0001)
+    // .linkStrength(1)
+    // .friction(0.9)
+    // .linkDistance(20)
+    // .theta(0.8)
+    // .alpha(0.1)
+    // .size([width, height])
+    // .start();
 
 
 
@@ -137,6 +155,13 @@
     var sizeScale = d3.scale.linear()
              .domain([  1, 10])
              .range([16, 100]);
+
+
+    foci = [];
+    sampleData.forEach(function(d,i){
+       foci.push({x: d.x, y: d.y});
+    });
+
 
 
 
@@ -156,17 +181,17 @@
      
 
 
+
     var rect = svg.selectAll("rect")
         .data(sampleData)
         .enter()
         .append("svg:image")
            .attr("xlink:href", function(d) { return d.path;})
-           // .attr("x", "-8px")
-           // .attr("y", "-8px")
            .attr("class", "whale-img")
            .attr("width", "16px")
            .attr("height", "16px")
-           .attr("transform", transform);
+           .attr("transform", transform)
+           // .call(force.start);
 
     console.log(sampleData);
                 
@@ -175,7 +200,9 @@
       rect.attr("transform", transform);
       rect.attr("width", scale_img);
       rect.attr("height", scale_img);
-      // force.resume();
+
+      // force.start()
+ 
     }
 
     function transform(d) {
@@ -196,17 +223,27 @@
           // console.log(d3.select(this).data());
            var that = this,
                a = this.getBoundingClientRect();
-           // d3.selectAll(".whale-img")
+
            rect.each(function() {
                 if(this != that) {
-                  var b = this.getBoundingClientRect();
+                  var b = this.getBoundingClientRect();                               
                   if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
                      (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+
+                    that_mid_x = a.left + a.width/2;
+                    that_mid_y = a.top - a.height/2;
+                    this_mid_x = b.left + b.width/2;
+                    this_mid_y = b.top  - b.height/2;
+
+                    dist_from_centre_x = Math.abs((this_mid_x + that_mid_x)/2 - mid_x);
+                    dist_from_centre_y = Math.abs((this_mid_y + that_mid_y)/2 - mid_y);
+
+                    dist_from_centre = Math.sqrt(Math.pow(dist_from_centre_x, 2) + Math.pow(dist_from_centre_y, 2))
                     // overlap, move labels
                     var dx = (Math.max(0, a.right - b.left) +
-                             Math.min(0, a.left - b.right)) * 0.01,
+                             Math.min(0, a.left - b.right)) * .01,//Math.pow(dist_from_centre, .2),
                         dy = (Math.max(0, a.bottom - b.top) +
-                             Math.min(0, a.top - b.bottom)) * 0.02,
+                             Math.min(0, a.top - b.bottom)) * .02, //Math.pow(dist_from_centre, .2),
                         tt = d3.transform(d3.select(this).attr("transform")),
                         to = d3.transform(d3.select(that).attr("transform"));
                     move += Math.abs(dx) + Math.abs(dy);
@@ -227,6 +264,7 @@
       // Set the data values as the non-overlapping points
       rect.each(function() {
 
+
         tt = d3.transform(d3.select(this).attr("transform"));
 
         d3.select(this).data()[0].x = xScale.invert(tt.translate[0]);
@@ -237,6 +275,23 @@
 
 
     }
+
+
+
+
+    // force.on("tick", function(e) {
+    //     var k = .1 * e.alpha;
+
+    //     sampleData.forEach(function(o, j) {
+    //         // The change in the position is proportional to the distance
+    //         // between the label and the corresponding place (foci)
+    //         o.y += (foci[j].y - o.y) * k;
+    //         o.x += (foci[j].x - o.x) * k;
+    //     });
+
+    //     rect.attr("transform", transform);
+
+    // });
 
 
     console.log('about to run arrangeLabels');
