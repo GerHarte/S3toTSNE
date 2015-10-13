@@ -206,6 +206,7 @@
       dist_from_centre = Math.sqrt(Math.pow(this_mid_x - mid_x, 2) + Math.pow(this_mid_y - mid_y, 2));
 
       sampleData[i].distance_from_centre = dist_from_centre;
+      d3.select(this).attr("distance_from_centre", dist_from_centre)
 
     })
 
@@ -255,7 +256,7 @@
                     dist_from_centre_y = Math.abs((this_mid_y + that_mid_y)/2 - mid_y);
 
                     dist_from_centre = Math.sqrt(Math.pow(dist_from_centre_x, 2) + Math.pow(dist_from_centre_y, 2));
-                    
+
                     // overlap, move labels
                     var dx = (Math.max(0, a.right - b.left) +
                              Math.min(0, a.left - b.right)) * .01, //* Math.pow(dist_from_centre, .01),
