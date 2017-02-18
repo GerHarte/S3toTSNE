@@ -29,7 +29,7 @@ This tool will take the raw images, conver them to 2d arrays of pixels, run the 
 
 A web page will open in the browser with an input box for an S3 folder location, and some setting for t-SNE Parameters. Ensure your S3 bucket is accessable from your local machine.
 
-<img src = "https://github.com/GerHarte/S3toTSNE/tree/master/static/img/Screenshot1.png">
+<img src = "https://github.com/GerHarte/S3toTSNE/blob/master/static/img/Screenshot1.png"/>
 
 Enter your S3 bucket location holding your images. They will get loaded to the application (this could take a while, progress will be printed to the command line). Once the images are converted and loaded into the application, they will be cached so changing parameters and re-running t-SNE will be much faster.
 
