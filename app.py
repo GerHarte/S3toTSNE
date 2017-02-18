@@ -63,7 +63,11 @@ def get_images():
         folder = '/'.join(path.split('/')[1:])
         new_data_folder = 'tsnetooldata/' + folder
 
-        
+        print 'folder'
+        folder
+
+        print 'new_data_folder'
+        print new_data_folder
 
         con_s3 = S3Connection()
         tsnetooldata_bucket = con_s3.get_bucket('tsnetooldata')
@@ -72,38 +76,41 @@ def get_images():
         filesInBucket = selectedBucket.list(folder)
 
         if tsnetooldata_bucket.get_key(folder + '/img_data.pkl') is None:
-
+            print 'pickle does not exist'
             img_data = dict()
             i = 0
             for f in filesInBucket:
-                print f
-                #Load in the file
-                file = StringIO()
-                f.get_file(file)
-                file.seek(0)
-                pil_image = Image.open(file)
-                
-                #Resize
-                pil_image_small = pil_image.resize((50, 50), Image.NEAREST) 
-                
-                #Save 
-                out_pil_image_small = cStringIO.StringIO()
-                pil_image_small.save(out_pil_image_small, 'PNG')
-                 
-                k = Key(tsnetooldata_bucket)
-                k.key = f.key
-                k.set_contents_from_string(out_pil_image_small.getvalue())
+                try:
+                    print f
+                    #Load in the file
+                    file = StringIO()
+                    f.get_file(file)
+                    file.seek(0)
+                    pil_image = Image.open(file)
+                    
+                    #Resize
+                    pil_image_small = pil_image.resize((50, 50), Image.NEAREST) 
+                    
+                    #Save 
+                    out_pil_image_small = cStringIO.StringIO()
+                    pil_image_small.save(out_pil_image_small, 'PNG')
+                     
+                    k = Key(tsnetooldata_bucket)
+                    k.key = f.key
+                    k.set_contents_from_string(out_pil_image_small.getvalue())
 
-                #Get Flattened Data
-                img_url = k.generate_url(expires_in=0, query_auth=False)
-                img_flat = np.array(pil_image_small).ravel() 
+                    #Get Flattened Data
+                    img_url = k.generate_url(expires_in=0, query_auth=False)
+                    img_flat = np.array(pil_image_small).ravel() 
 
-                #Make Dict
-                img_data[img_url] = img_flat
-                
-                if i%100 == 0:
-                    print i
-                i += 1
+                    #Make Dict
+                    img_data[img_url] = img_flat
+                    
+                    if i%100 == 0:
+                        print i
+                    i += 1
+                except:
+                    print 'error'
 
                 
             k = Key(tsnetooldata_bucket)
@@ -152,6 +159,7 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
 
         print 'No TSNE Pickle'
         print "Running T-SNE"
+        print img_similarities
         tsne_model = TSNE(n_components=2, random_state=0, perplexity = perplexity, early_exaggeration  = exageration ,learning_rate = learning_rate, verbose = 2) #metric = 'precomputed', )
         tsne_fit = tsne_model.fit_transform(img_similarities)
         print 'T-SNE Complete'
@@ -170,7 +178,7 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
         t_sne_df = pickle.loads(t_sne_df_pickle.get_contents_as_string())
 
 
-    return t_sne_df[:500].to_json(orient ='records')
+    return t_sne_df.to_json(orient ='records')
     
     
     
