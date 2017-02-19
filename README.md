@@ -49,3 +49,12 @@ You can zoom and pan round the images to inspect the clusters.
 
 <img src = "https://github.com/GerHarte/S3toTSNE/blob/master/static/img/Screenshot7.png"/>
 
+Here is another example of image tiles from the Kaggle Right Whales competition to see which tiles had whales and which were only water
+
+<img src = "https://github.com/GerHarte/S3toTSNE/blob/master/static/img/Screenshot Whales.png"/>
+
+You can clearly see the cluster on the bottom left that separates out tiles that are more than just sea water.
+
+<img src = "https://github.com/GerHarte/S3toTSNE/blob/master/static/img/Screenshot Whales2.png"/>
+
+
