@@ -160,13 +160,17 @@ def runTSNE(path, folder, metric, perplexity, exageration, learning_rate):
         print 'No TSNE Pickle'
         print "Running T-SNE"
         print img_similarities
-        tsne_model = TSNE(n_components=2, random_state=0, perplexity = perplexity, early_exaggeration  = exageration ,learning_rate = learning_rate, verbose = 2) #metric = 'precomputed', )
+        tsne_model = TSNE(n_components=2, random_state=0, perplexity = perplexity, early_exaggeration  = exageration ,learning_rate = learning_rate, verbose = 2, method='exact', n_iter=300) #metric = 'precomputed', )
+        print tsne_model
         tsne_fit = tsne_model.fit_transform(img_similarities)
         print 'T-SNE Complete'
+        print tsne_fit
 
         t_sne_df = pd.DataFrame(tsne_fit)
         t_sne_df.columns = ['x', 'y']
+        print t_sne_df
         t_sne_df['path'] =  img_data.keys()
+
 
         print 'Saving T-SNE Pickle'
         k = Key(tsnetooldata_bucket)    
