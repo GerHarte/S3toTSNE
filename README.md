@@ -49,5 +49,3 @@ You can zoom and pan round the images to inspect the clusters.
 
 <img src = "https://github.com/GerHarte/S3toTSNE/blob/master/static/img/Screenshot7.png"/>
 
-
-t-SNE can take some time to tune, there should be 
